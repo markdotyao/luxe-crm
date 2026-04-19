@@ -2,13 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  AuthCard,
-  buttonStyle,
-  errorStyle,
-  formFieldStyle,
-  labelStyle,
-} from "@/app/(auth)/auth-card";
+import { AuthShell } from "@/app/(auth)/auth-card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -23,9 +20,6 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // The email link flow lands on /auth/callback first, which establishes a
-    // session and redirects here. If we got here without one, send the user
-    // back to request a new link.
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
@@ -64,44 +58,50 @@ export default function ResetPasswordPage() {
   }
 
   if (!ready) {
-    return <AuthCard title="Loading…">{null}</AuthCard>;
+    return (
+      <AuthShell title="Loading…">
+        <div className="h-6" />
+      </AuthShell>
+    );
   }
 
   return (
-    <AuthCard
+    <AuthShell
       title="Set a new password"
-      subtitle="Choose a password you haven't used before."
+      description="Choose a password you haven't used before."
     >
-      <form onSubmit={onSubmit} noValidate>
-        <label style={labelStyle}>
-          New password
-          <input
+      <form onSubmit={onSubmit} noValidate className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="password">New password</Label>
+          <Input
+            id="password"
             type="password"
             required
             autoComplete="new-password"
             minLength={MIN_PASSWORD_LENGTH}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={formFieldStyle}
           />
-        </label>
-        <label style={labelStyle}>
-          Confirm new password
-          <input
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="confirm">Confirm new password</Label>
+          <Input
+            id="confirm"
             type="password"
             required
             autoComplete="new-password"
             minLength={MIN_PASSWORD_LENGTH}
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
-            style={formFieldStyle}
           />
-        </label>
-        {error ? <p style={errorStyle}>{error}</p> : null}
-        <button type="submit" disabled={loading} style={buttonStyle}>
+        </div>
+        {error ? (
+          <p className="text-sm text-destructive">{error}</p>
+        ) : null}
+        <Button type="submit" disabled={loading} className="w-full">
           {loading ? "Saving…" : "Update password"}
-        </button>
+        </Button>
       </form>
-    </AuthCard>
+    </AuthShell>
   );
 }

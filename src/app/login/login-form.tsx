@@ -3,14 +3,10 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import {
-  AuthCard,
-  buttonStyle,
-  errorStyle,
-  formFieldStyle,
-  labelStyle,
-  linkStyle,
-} from "@/app/(auth)/auth-card";
+import { AuthShell } from "@/app/(auth)/auth-card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
 export function LoginForm() {
@@ -45,43 +41,48 @@ export function LoginForm() {
   }
 
   return (
-    <AuthCard
+    <AuthShell
       title="Sign in"
-      subtitle="Enter your email and password to continue."
+      description="Enter your email and password to continue."
       footer={
-        <Link href="/forgot-password" style={linkStyle}>
+        <Link
+          href="/forgot-password"
+          className="text-foreground underline-offset-4 hover:underline"
+        >
           Forgot your password?
         </Link>
       }
     >
-      <form onSubmit={onSubmit} noValidate>
-        <label style={labelStyle}>
-          Email
-          <input
+      <form onSubmit={onSubmit} noValidate className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
             type="email"
             required
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={formFieldStyle}
           />
-        </label>
-        <label style={labelStyle}>
-          Password
-          <input
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
             type="password"
             required
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={formFieldStyle}
           />
-        </label>
-        {error ? <p style={errorStyle}>{error}</p> : null}
-        <button type="submit" disabled={loading} style={buttonStyle}>
+        </div>
+        {error ? (
+          <p className="text-sm text-destructive">{error}</p>
+        ) : null}
+        <Button type="submit" disabled={loading} className="w-full">
           {loading ? "Signing in…" : "Sign in"}
-        </button>
+        </Button>
       </form>
-    </AuthCard>
+    </AuthShell>
   );
 }

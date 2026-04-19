@@ -2,14 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import {
-  AuthCard,
-  buttonStyle,
-  errorStyle,
-  formFieldStyle,
-  labelStyle,
-  linkStyle,
-} from "@/app/(auth)/auth-card";
+import { AuthShell } from "@/app/(auth)/auth-card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ForgotPasswordPage() {
@@ -40,50 +36,58 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <AuthCard
+      <AuthShell
         title="Check your email"
-        subtitle="We've sent a password-reset link. It may take a minute to arrive."
+        description="We've sent a password-reset link. It may take a minute to arrive."
         footer={
-          <Link href="/login" style={linkStyle}>
+          <Link
+            href="/login"
+            className="text-foreground underline-offset-4 hover:underline"
+          >
             Back to sign in
           </Link>
         }
       >
-        <p style={{ fontSize: "0.875rem", color: "#555" }}>
+        <p className="text-sm text-muted-foreground">
           If you don&apos;t see it, check your spam folder or confirm you&apos;re
           using the email your admin registered.
         </p>
-      </AuthCard>
+      </AuthShell>
     );
   }
 
   return (
-    <AuthCard
+    <AuthShell
       title="Reset your password"
-      subtitle="Enter your email and we'll send you a link to set a new password."
+      description="Enter your email and we'll send you a link to set a new password."
       footer={
-        <Link href="/login" style={linkStyle}>
+        <Link
+          href="/login"
+          className="text-foreground underline-offset-4 hover:underline"
+        >
           Back to sign in
         </Link>
       }
     >
-      <form onSubmit={onSubmit} noValidate>
-        <label style={labelStyle}>
-          Email
-          <input
+      <form onSubmit={onSubmit} noValidate className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
             type="email"
             required
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={formFieldStyle}
           />
-        </label>
-        {error ? <p style={errorStyle}>{error}</p> : null}
-        <button type="submit" disabled={loading} style={buttonStyle}>
+        </div>
+        {error ? (
+          <p className="text-sm text-destructive">{error}</p>
+        ) : null}
+        <Button type="submit" disabled={loading} className="w-full">
           {loading ? "Sending…" : "Send reset link"}
-        </button>
+        </Button>
       </form>
-    </AuthCard>
+    </AuthShell>
   );
 }
