@@ -31,6 +31,7 @@ export default async function NewContactPage() {
     <NewContactForm
       role={profile?.role ?? "sales_staff"}
       userBrandId={profile?.brand_id ?? null}
+      userStoreId={profile?.store_id ?? null}
       brands={brands}
       stores={stores}
     />

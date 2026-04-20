@@ -4,6 +4,7 @@ import { ArrowLeft, Info } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +34,7 @@ type StoreOption = { id: string; name: string };
 type Props = {
   role: ProfileRole;
   userBrandId: string | null;
+  userStoreId: string | null;
   brands: BrandOption[];
   stores: StoreOption[];
 };
@@ -45,7 +47,13 @@ const GENDER_OPTIONS: { value: string; label: string }[] = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
 ];
 
-export function NewContactForm({ role, userBrandId, brands, stores }: Props) {
+export function NewContactForm({
+  role,
+  userBrandId,
+  userStoreId,
+  brands,
+  stores,
+}: Props) {
   const router = useRouter();
   const isAdmin = role === "admin";
 
@@ -59,7 +67,7 @@ export function NewContactForm({ role, userBrandId, brands, stores }: Props) {
   const [brandId, setBrandId] = useState<string>(
     userBrandId ?? brands[0]?.id ?? "",
   );
-  const [storeId, setStoreId] = useState<string>("");
+  const [storeId, setStoreId] = useState<string>(userStoreId ?? "");
   const [notes, setNotes] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
@@ -116,7 +124,7 @@ export function NewContactForm({ role, userBrandId, brands, stores }: Props) {
     setSubmitError(null);
 
     const supabase = createClient();
-    const { error } = await supabase.rpc("create_or_link_contact", {
+    const { data, error } = await supabase.rpc("create_or_link_contact", {
       p_first_name: firstName.trim(),
       p_last_name: lastName.trim(),
       p_phone: normalizedPhone,
@@ -134,6 +142,13 @@ export function NewContactForm({ role, userBrandId, brands, stores }: Props) {
       setSubmitError(error.message);
       return;
     }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    toast.success(
+      result?.was_linked
+        ? `${firstName.trim()} ${lastName.trim()} linked to your brand`
+        : `${firstName.trim()} ${lastName.trim()} added`,
+    );
 
     router.push("/");
     router.refresh();
@@ -236,26 +251,30 @@ export function NewContactForm({ role, userBrandId, brands, stores }: Props) {
                 />
               </Field>
 
-              {isAdmin ? (
-                <Field label="Brand" htmlFor="brand" required>
-                  <SelectNative
-                    id="brand"
-                    required
-                    value={brandId}
-                    onChange={(e) => setBrandId(e.target.value)}
-                  >
-                    {brands.length === 0 ? (
-                      <option value="">No brands available</option>
-                    ) : (
-                      brands.map((b) => (
-                        <option key={b.id} value={b.id}>
-                          {b.name}
-                        </option>
-                      ))
-                    )}
-                  </SelectNative>
-                </Field>
-              ) : null}
+              <Field
+                label="Brand"
+                htmlFor="brand"
+                required
+                hint={isAdmin ? undefined : "Assigned by your administrator"}
+              >
+                <SelectNative
+                  id="brand"
+                  required
+                  disabled={!isAdmin}
+                  value={brandId}
+                  onChange={(e) => setBrandId(e.target.value)}
+                >
+                  {brands.length === 0 ? (
+                    <option value="">No brands available</option>
+                  ) : (
+                    brands.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name}
+                      </option>
+                    ))
+                  )}
+                </SelectNative>
+              </Field>
 
               <Field label="Store" htmlFor="store">
                 <SelectNative
@@ -348,8 +367,13 @@ function DedupBanner({
       <Alert variant="destructive">
         <Info />
         <AlertTitle>This contact already exists for this brand</AlertTitle>
-        <AlertDescription>
-          Saving is disabled. Open the existing contact instead.
+        <AlertDescription className="space-y-3">
+          <p>Saving is disabled. Open the existing contact instead.</p>
+          <Button asChild size="sm" variant="outline">
+            <Link href={`/contacts/${status.contactId}`}>
+              View existing contact
+            </Link>
+          </Button>
         </AlertDescription>
       </Alert>
     );
