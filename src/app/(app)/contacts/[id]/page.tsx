@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -58,13 +58,21 @@ export default async function ContactDetailPage({
       </Button>
 
       <Card>
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl">
-            {c.first_name} {c.last_name}
-          </CardTitle>
-          <CardDescription>
-            Added {longDate.format(new Date(c.created_at))}
-          </CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
+          <div className="space-y-2">
+            <CardTitle className="text-2xl">
+              {c.first_name} {c.last_name}
+            </CardTitle>
+            <CardDescription>
+              Added {longDate.format(new Date(c.created_at))}
+            </CardDescription>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/contacts/${c.id}/edit`}>
+              <Pencil />
+              Edit
+            </Link>
+          </Button>
         </CardHeader>
         <CardContent>
           <dl className="grid gap-4 sm:grid-cols-2">
