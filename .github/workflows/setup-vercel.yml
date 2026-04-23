@@ -1,0 +1,35 @@
+name: Setup Vercel
+
+# One-time: push Supabase env vars into the Vercel project.
+# Re-run whenever the Supabase URL or anon key rotates. Assumes the Vercel
+# project has already been created (via the dashboard's "Import Project"
+# flow) so that VERCEL_PROJECT_ID is known.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+    steps:
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Sync env vars to Vercel
+        run: |
+          set -euo pipefail
+          upsert() {
+            local name="$1" value="$2"
+            for tier in production preview development; do
+              vercel env rm "$name" "$tier" --yes --token "$VERCEL_TOKEN" 2>/dev/null || true
+              printf '%s' "$value" | vercel env add "$name" "$tier" --token "$VERCEL_TOKEN"
+            done
+          }
+          upsert NEXT_PUBLIC_SUPABASE_URL "$SUPABASE_URL"
+          upsert NEXT_PUBLIC_SUPABASE_ANON_KEY "$SUPABASE_ANON_KEY"
