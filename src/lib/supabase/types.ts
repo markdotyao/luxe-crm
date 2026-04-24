@@ -231,6 +231,30 @@ export type Database = {
         Args: { e: string };
         Returns: string;
       };
+      admin_list_users: {
+        Args: Record<string, never>;
+        Returns: {
+          id: string;
+          email: string;
+          role: Database["public"]["Enums"]["user_role"];
+          brand_id: string | null;
+          store_id: string | null;
+          first_name: string | null;
+          last_name: string | null;
+          created_at: string;
+        }[];
+      };
+      admin_assign_profile: {
+        Args: {
+          p_user_id: string;
+          p_role: Database["public"]["Enums"]["user_role"];
+          p_brand_id: string | null;
+          p_store_id: string | null;
+          p_first_name: string | null;
+          p_last_name: string | null;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       user_role: "admin" | "brand_manager" | "sales_staff";
