@@ -46,5 +46,12 @@ enable_signup = false
 double_confirm_changes = true
 enable_confirmations = true
 
+# Invite email template. Mirror these values in the hosted Supabase project
+# under Authentication > Email Templates > Invite user (the CLI only applies
+# this to local dev).
+[auth.email.template.invite]
+subject = "You have been invited as a user on Luxe CRM"
+content_path = "./supabase/templates/invite.html"
+
 [analytics]
 enabled = false

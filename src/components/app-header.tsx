@@ -15,6 +15,12 @@ export function AppHeader({
           <Link href="/" className="text-sm font-semibold tracking-tight">
             Luxe CRM
           </Link>
+          <Link
+            href="/"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            Contacts
+          </Link>
           {isAdmin ? (
             <Link
               href="/admin/users"

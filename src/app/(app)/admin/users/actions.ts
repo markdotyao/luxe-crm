@@ -1,10 +1,26 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { getProfile } from "@/lib/auth/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { Enums } from "@/lib/supabase/types";
+
+/**
+ * Where invited users land after clicking the email link. Prefer the
+ * NEXT_PUBLIC_SITE_URL env var (set this on Vercel to your canonical
+ * production/preview URL); fall back to the current request origin so local
+ * dev "just works".
+ */
+async function siteUrl(): Promise<string> {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  if (!host) throw new Error("Could not determine site URL for invite");
+  return `${proto}://${host}`;
+}
 
 type Role = Enums<"user_role">;
 
@@ -55,8 +71,10 @@ export async function inviteUser(input: InviteInput): Promise<ActionResult> {
     last_name: input.lastName.trim() || null,
   };
 
+  const redirectTo = `${await siteUrl()}/auth/callback?next=/reset-password`;
   const { error } = await admin.auth.admin.inviteUserByEmail(email, {
     data: metadata,
+    redirectTo,
   });
   if (error) return { ok: false, error: error.message };
 
@@ -90,8 +108,10 @@ export async function resendInvite(email: string): Promise<ActionResult> {
   await requireAdmin();
 
   const admin = createAdminClient();
+  const redirectTo = `${await siteUrl()}/auth/callback?next=/reset-password`;
   const { error } = await admin.auth.admin.inviteUserByEmail(
     email.trim().toLowerCase(),
+    { redirectTo },
   );
   if (error) return { ok: false, error: error.message };
   return { ok: true };
