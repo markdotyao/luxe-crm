@@ -7,6 +7,7 @@ describe("isPublicPath", () => {
     expect(isPublicPath("/forgot-password")).toBe(true);
     expect(isPublicPath("/reset-password")).toBe(true);
     expect(isPublicPath("/auth/callback")).toBe(true);
+    expect(isPublicPath("/customers")).toBe(true);
   });
 
   it("gates app routes", () => {
@@ -17,11 +18,13 @@ describe("isPublicPath", () => {
 
   it("matches nested segments of a public prefix", () => {
     expect(isPublicPath("/auth/callback/xyz")).toBe(true);
+    expect(isPublicPath("/customers/panerai/abc-uuid/new")).toBe(true);
   });
 
   it("does not treat lookalike paths as public", () => {
     expect(isPublicPath("/loginx")).toBe(false);
     expect(isPublicPath("/login-help")).toBe(false);
     expect(isPublicPath("/reset-password-help")).toBe(false);
+    expect(isPublicPath("/customersx")).toBe(false);
   });
 });

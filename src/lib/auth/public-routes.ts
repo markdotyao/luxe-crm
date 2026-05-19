@@ -7,6 +7,7 @@ const PUBLIC_PREFIXES = [
   "/forgot-password",
   "/reset-password",
   "/auth/callback",
+  "/customers",
 ] as const;
 
 export function isPublicPath(pathname: string): boolean {
