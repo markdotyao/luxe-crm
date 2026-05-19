@@ -21,6 +21,12 @@ export function AppHeader({
           >
             Contacts
           </Link>
+          <Link
+            href="/interest"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            Interest List
+          </Link>
           {isAdmin ? (
             <Link
               href="/admin/users"

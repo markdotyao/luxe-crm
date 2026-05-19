@@ -139,6 +139,87 @@ export type Database = {
         };
         Relationships: [];
       };
+      models: {
+        Row: {
+          id: string;
+          brand_id: string;
+          reference: string;
+          name: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          brand_id: string;
+          reference: string;
+          name?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          brand_id?: string;
+          reference?: string;
+          name?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "models_brand_id_fkey";
+            columns: ["brand_id"];
+            isOneToOne: false;
+            referencedRelation: "brands";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      interest_entries: {
+        Row: {
+          id: string;
+          contact_id: string;
+          model_id: string;
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          contact_id: string;
+          model_id: string;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          contact_id?: string;
+          model_id?: string;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "interest_entries_contact_id_fkey";
+            columns: ["contact_id"];
+            isOneToOne: false;
+            referencedRelation: "contacts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "interest_entries_model_id_fkey";
+            columns: ["model_id"];
+            isOneToOne: false;
+            referencedRelation: "models";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "interest_entries_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       contact_brands: {
         Row: {
           contact_id: string;
