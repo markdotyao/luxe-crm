@@ -20,16 +20,19 @@ export type Database = {
         Row: {
           id: string;
           name: string;
+          slug: string;
           created_at: string;
         };
         Insert: {
           id?: string;
           name: string;
+          slug: string;
           created_at?: string;
         };
         Update: {
           id?: string;
           name?: string;
+          slug?: string;
           created_at?: string;
         };
         Relationships: [];
@@ -254,6 +257,24 @@ export type Database = {
           p_last_name: string | null;
         };
         Returns: undefined;
+      };
+      public_create_contact: {
+        Args: {
+          p_brand_slug: string;
+          p_store_id: string | null;
+          p_first_name: string;
+          p_last_name: string;
+          p_phone: string | null;
+          p_email: string | null;
+          p_dob: string | null;
+          p_gender: Database["public"]["Enums"]["gender"] | null;
+          p_city: string | null;
+        };
+        Returns: {
+          contact_id: string;
+          was_created: boolean;
+          was_linked: boolean;
+        }[];
       };
     };
     Enums: {
