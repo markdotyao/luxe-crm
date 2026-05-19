@@ -19,6 +19,13 @@ update brands set slug = 'panerai'   where name = 'Panerai';
 update brands set slug = 'hublot'    where name = 'Hublot';
 update brands set slug = 'tag-heuer' where name = 'Tag Heuer';
 
+-- Fallback for any other brand: slugify the name (lowercase, collapse runs
+-- of non-alphanumerics into hyphens, trim leading/trailing hyphens). Matches
+-- the brands_slug_format_ck regex below.
+update brands
+   set slug = trim(both '-' from regexp_replace(lower(name), '[^a-z0-9]+', '-', 'g'))
+ where slug is null;
+
 alter table brands alter column slug set not null;
 alter table brands add constraint brands_slug_uq unique (slug);
 alter table brands add constraint brands_slug_format_ck
