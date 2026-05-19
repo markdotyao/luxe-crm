@@ -9,18 +9,33 @@
 --    RLS. Idempotent: if the contact already exists for this brand, return
 --    silently (no error) — the customer shouldn't get a different result
 --    just because they're already on the books.
+--
+-- Idempotent throughout so a partial prior run (e.g. failed SET NOT NULL on
+-- a row this script didn't backfill) can be re-applied without manual cleanup.
 
 -- ---------------------------------------------------------------------------
 -- 1) brands.slug
 -- ---------------------------------------------------------------------------
-alter table brands add column slug text;
+alter table brands add column if not exists slug text;
 
-update brands set slug = 'panerai'   where name = 'Panerai';
-update brands set slug = 'hublot'    where name = 'Hublot';
-update brands set slug = 'tag-heuer' where name = 'Tag Heuer';
+-- Explicit backfill for the three seed brands.
+update brands set slug = 'panerai'   where slug is null and name = 'Panerai';
+update brands set slug = 'hublot'    where slug is null and name = 'Hublot';
+update brands set slug = 'tag-heuer' where slug is null and name = 'Tag Heuer';
+
+-- Fallback: slugify the name for anything still NULL. Lowercases, collapses
+-- non-alphanumeric runs into single hyphens, trims leading/trailing hyphens.
+-- Matches the brands_slug_format_ck regex below.
+update brands
+   set slug = trim(both '-' from regexp_replace(lower(name), '[^a-z0-9]+', '-', 'g'))
+ where slug is null;
 
 alter table brands alter column slug set not null;
+
+alter table brands drop constraint if exists brands_slug_uq;
 alter table brands add constraint brands_slug_uq unique (slug);
+
+alter table brands drop constraint if exists brands_slug_format_ck;
 alter table brands add constraint brands_slug_format_ck
   check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$');
 
@@ -28,10 +43,10 @@ alter table brands add constraint brands_slug_format_ck
 -- 2) Relax SELECT to anon for brands and stores.
 --    Both are non-PII reference data; the public form needs to read them.
 -- ---------------------------------------------------------------------------
-drop policy brands_select on brands;
+drop policy if exists brands_select on brands;
 create policy brands_select on brands for select using (true);
 
-drop policy stores_select on stores;
+drop policy if exists stores_select on stores;
 create policy stores_select on stores for select using (true);
 
 grant select on brands, stores to anon;
