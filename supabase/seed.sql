@@ -15,6 +15,17 @@ insert into stores (name, address) values
   ('Tag Heuer Boutique - Podium',    null)
 on conflict (name) do nothing;
 
+-- Pair each seed store with its natural brand. Replace with real
+-- multi-brand boutique mappings as the catalog grows.
+insert into brand_stores (brand_id, store_id)
+select b.id, s.id
+from brands b
+join stores s on
+  (b.name = 'Panerai'   and s.name = 'Panerai Boutique - BGC')
+  or (b.name = 'Hublot'    and s.name = 'Hublot Boutique - Greenbelt 5')
+  or (b.name = 'Tag Heuer' and s.name like 'Tag Heuer Boutique%')
+on conflict do nothing;
+
 -- Sample model references per brand. Replace with the real catalog as needed.
 insert into models (brand_id, reference, name)
 select b.id, m.reference, m.name
