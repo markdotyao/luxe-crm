@@ -114,7 +114,12 @@ export default async function ContactsPage() {
                 {contacts.map((c) => (
                   <TableRow key={c.id}>
                     <TableCell className="font-medium">
-                      {c.first_name} {c.last_name}
+                      <Link
+                        href={`/contacts/${c.id}`}
+                        className="hover:underline"
+                      >
+                        {c.first_name} {c.last_name}
+                      </Link>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {c.phone ?? "—"}
