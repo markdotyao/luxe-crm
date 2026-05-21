@@ -4,10 +4,8 @@ import { getProfile, requireUser } from "@/lib/auth/session";
 
 export default async function AppLayout({
   children,
-  modal,
 }: {
   children: React.ReactNode;
-  modal: React.ReactNode;
 }) {
   const user = await requireUser();
   const profile = await getProfile();
@@ -19,7 +17,6 @@ export default async function AppLayout({
         isAdmin={profile?.role === "admin"}
       />
       <main className="container py-6 md:py-10">{children}</main>
-      {modal}
       <Toaster position="top-center" richColors />
     </div>
   );
