@@ -112,11 +112,11 @@ export default async function ContactsPage() {
               </TableHeader>
               <TableBody>
                 {contacts.map((c) => (
-                  <TableRow key={c.id}>
+                  <TableRow key={c.id} className="relative cursor-pointer">
                     <TableCell className="font-medium">
                       <Link
                         href={`/contacts/${c.id}`}
-                        className="hover:underline"
+                        className="hover:underline before:absolute before:inset-0 before:content-['']"
                       >
                         {c.first_name} {c.last_name}
                       </Link>
