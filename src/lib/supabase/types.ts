@@ -37,6 +37,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      brand_stores: {
+        Row: {
+          brand_id: string;
+          store_id: string;
+          created_at: string;
+        };
+        Insert: {
+          brand_id: string;
+          store_id: string;
+          created_at?: string;
+        };
+        Update: {
+          brand_id?: string;
+          store_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "brand_stores_brand_id_fkey";
+            columns: ["brand_id"];
+            isOneToOne: false;
+            referencedRelation: "brands";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "brand_stores_store_id_fkey";
+            columns: ["store_id"];
+            isOneToOne: false;
+            referencedRelation: "stores";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       stores: {
         Row: {
           id: string;
