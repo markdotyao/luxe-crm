@@ -2,6 +2,9 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PublicContactForm } from "./public-contact-form";
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default async function PublicSignupPage({
   params,
 }: {
@@ -14,25 +17,27 @@ export default async function PublicSignupPage({
     notFound();
   }
 
+  // Single query against the join table — only returns a row if the
+  // (brand, store) pair is actually associated. Removes the "Panerai form
+  // hosted at a Hublot store" failure mode.
   const supabase = await createClient();
-  const [{ data: brand }, { data: store }] = await Promise.all([
-    supabase.from("brands").select("id, name, slug").eq("slug", brandSlug).maybeSingle(),
-    supabase.from("stores").select("id, name").eq("id", storeId).maybeSingle(),
-  ]);
+  const { data } = await supabase
+    .from("brand_stores")
+    .select("brands!inner ( id, name, slug ), stores!inner ( id, name )")
+    .eq("brands.slug", brandSlug)
+    .eq("store_id", storeId)
+    .maybeSingle();
 
-  if (!brand || !store) {
+  if (!data?.brands || !data?.stores) {
     notFound();
   }
 
   return (
     <PublicContactForm
-      brandSlug={brand.slug}
-      brandName={brand.name}
-      storeId={store.id}
-      storeName={store.name}
+      brandSlug={data.brands.slug}
+      brandName={data.brands.name}
+      storeId={data.stores.id}
+      storeName={data.stores.name}
     />
   );
 }
-
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
