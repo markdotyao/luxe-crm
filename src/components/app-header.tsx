@@ -17,6 +17,7 @@ export function AppHeader({
     pathname === "/" || pathname.startsWith("/contacts");
   const isInterestActive = pathname.startsWith("/interest");
   const isUsersActive = pathname.startsWith("/admin/users");
+  const isIntakeActive = pathname.startsWith("/admin/intake");
 
   return (
     <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
@@ -32,9 +33,14 @@ export function AppHeader({
             Interest List
           </NavLink>
           {isAdmin ? (
-            <NavLink href="/admin/users" active={isUsersActive}>
-              Users
-            </NavLink>
+            <>
+              <NavLink href="/admin/users" active={isUsersActive}>
+                Users
+              </NavLink>
+              <NavLink href="/admin/intake" active={isIntakeActive}>
+                Intake Forms
+              </NavLink>
+            </>
           ) : null}
         </div>
         <div className="flex items-center gap-3">
