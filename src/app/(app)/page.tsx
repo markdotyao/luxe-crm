@@ -1,25 +1,11 @@
 import { Plus, Users } from "lucide-react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { EmptyState } from "@/components/empty-state";
 import { getProfile } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
-
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-});
+import { ContactsTable } from "./contacts-table";
 
 export default async function ContactsPage() {
   const profile = await getProfile();
@@ -97,60 +83,7 @@ export default async function ContactsPage() {
             <CardTitle>Contacts</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead className="hidden md:table-cell">City</TableHead>
-                  <TableHead>Brands</TableHead>
-                  <TableHead className="hidden md:table-cell">
-                    Created
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {contacts.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell className="font-medium">
-                      <Link
-                        href={`/contacts/${c.id}`}
-                        className="hover:underline"
-                      >
-                        {c.first_name} {c.last_name}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {c.phone ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {c.email ?? "—"}
-                    </TableCell>
-                    <TableCell className="hidden text-muted-foreground md:table-cell">
-                      {c.city ?? "—"}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {c.contact_brands
-                          .map((cb) => cb.brands)
-                          .filter(
-                            (b): b is { id: string; name: string } => b !== null,
-                          )
-                          .map((b) => (
-                            <Badge key={b.id} variant="secondary">
-                              {b.name}
-                            </Badge>
-                          ))}
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden text-muted-foreground md:table-cell">
-                      {dateFormatter.format(new Date(c.created_at))}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <ContactsTable contacts={contacts} />
           </CardContent>
         </Card>
       )}
