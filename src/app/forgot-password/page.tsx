@@ -6,6 +6,7 @@ import { AuthShell } from "@/app/(auth)/auth-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { friendlyAuthError } from "@/lib/auth/error-messages";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ForgotPasswordPage() {
@@ -28,7 +29,7 @@ export default function ForgotPasswordPage() {
 
     setLoading(false);
     if (resetError) {
-      setError(resetError.message);
+      setError(friendlyAuthError(resetError.message));
       return;
     }
     setSent(true);
