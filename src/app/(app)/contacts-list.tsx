@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { SelectNative } from "@/components/ui/select-native";
 import {
   Table,
   TableBody,
@@ -40,6 +42,8 @@ type Contact = {
 
 type SortDir = "asc" | "desc";
 
+type Brand = { id: string; name: string; slug: string };
+
 export function ContactsList({
   contacts,
   totalCount,
@@ -47,6 +51,8 @@ export function ContactsList({
   pageSize,
   sort,
   dir,
+  brands,
+  brandSlug,
 }: {
   contacts: Contact[];
   totalCount: number;
@@ -54,6 +60,8 @@ export function ContactsList({
   pageSize: number;
   sort: string;
   dir: SortDir;
+  brands: Brand[];
+  brandSlug: string | null;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -84,13 +92,45 @@ export function ContactsList({
     navigateWith({ page: next === 1 ? null : String(next) });
   }
 
+  function setBrand(next: string) {
+    // Changing the filter scope invalidates the current page; reset to 1.
+    navigateWith({ brand: next === "" ? null : next, page: null });
+  }
+
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const from = (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, totalCount);
 
   return (
     <div className="space-y-4">
-      <ContactsSearch onSelect={setOpenId} />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex-1">
+          <ContactsSearch onSelect={setOpenId} />
+        </div>
+        {brands.length > 1 ? (
+          <div className="flex items-center gap-2">
+            <Label
+              htmlFor="brand-filter"
+              className="text-xs text-muted-foreground"
+            >
+              Brand
+            </Label>
+            <SelectNative
+              id="brand-filter"
+              value={brandSlug ?? ""}
+              onChange={(e) => setBrand(e.target.value)}
+              className="w-auto"
+            >
+              <option value="">All brands</option>
+              {brands.map((b) => (
+                <option key={b.id} value={b.slug}>
+                  {b.name}
+                </option>
+              ))}
+            </SelectNative>
+          </div>
+        ) : null}
+      </div>
 
       <div className="overflow-x-auto">
         <Table>
@@ -137,6 +177,16 @@ export function ContactsList({
             </TableRow>
           </TableHeader>
           <TableBody>
+            {contacts.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="py-8 text-center text-sm text-muted-foreground"
+                >
+                  No contacts match this filter.
+                </TableCell>
+              </TableRow>
+            ) : null}
             {contacts.map((c) => (
               <TableRow
                 key={c.id}
@@ -186,32 +236,34 @@ export function ContactsList({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between gap-2 pt-2">
-        <p className="text-xs text-muted-foreground">
-          Showing {from}–{to} of {totalCount}
-        </p>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page <= 1}
-            onClick={() => setPage(page - 1)}
-          >
-            Previous
-          </Button>
-          <span className="text-xs text-muted-foreground">
-            Page {page} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages}
-            onClick={() => setPage(page + 1)}
-          >
-            Next
-          </Button>
+      {totalCount > 0 ? (
+        <div className="flex items-center justify-between gap-2 pt-2">
+          <p className="text-xs text-muted-foreground">
+            Showing {from}–{to} of {totalCount}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => setPage(page - 1)}
+            >
+              Previous
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              Page {page} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages}
+              onClick={() => setPage(page + 1)}
+            >
+              Next
+            </Button>
+          </div>
         </div>
-      </div>
+      ) : null}
 
       <ContactDetailDrawer
         contactId={openId}
