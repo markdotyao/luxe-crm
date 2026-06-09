@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { downloadCsv, toCsv } from "@/lib/csv";
 import { createClient } from "@/lib/supabase/client";
 
 type BrandOption = { id: string; name: string };
@@ -124,6 +125,41 @@ export function InterestBrowser({
   }, [modelId]);
 
   const selectedModel = models.find((m) => m.id === modelId);
+  const selectedBrandName = brands.find((b) => b.id === brandId)?.name ?? null;
+
+  function exportCsv() {
+    if (entries.length === 0 || !selectedModel) return;
+    const csv = toCsv(entries, [
+      {
+        header: "First name",
+        value: (e) => e.contacts?.first_name ?? "",
+      },
+      {
+        header: "Last name",
+        value: (e) => e.contacts?.last_name ?? "",
+      },
+      { header: "Phone", value: (e) => e.contacts?.phone ?? "" },
+      { header: "Email", value: (e) => e.contacts?.email ?? "" },
+      { header: "Notes", value: (e) => e.notes ?? "" },
+      { header: "Added at", value: (e) => e.created_at },
+      {
+        header: "Added by",
+        value: (e) =>
+          e.profiles
+            ? `${e.profiles.first_name ?? ""} ${e.profiles.last_name ?? ""}`.trim()
+            : "",
+      },
+    ]);
+    const today = new Date().toISOString().slice(0, 10);
+    const safeBrand = (selectedBrandName ?? "brand")
+      .toLowerCase()
+      .replace(/\s+/g, "-");
+    const safeRef = selectedModel.reference
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    downloadCsv(`interest-${safeBrand}-${safeRef}-${today}.csv`, csv);
+  }
 
   return (
     <div className="space-y-6">
@@ -194,17 +230,28 @@ export function InterestBrowser({
 
       {modelId ? (
         <section className="space-y-3">
-          <div className="flex items-baseline justify-between">
+          <div className="flex items-baseline justify-between gap-3">
             <h2 className="text-sm font-medium text-muted-foreground">
               {selectedModel ? modelLabel(selectedModel) : "Selected model"}
             </h2>
-            <span className="text-xs text-muted-foreground">
-              {entries.length === 0
-                ? loadingEntries
-                  ? "Loading…"
-                  : "No customers yet"
-                : `${entries.length} customer${entries.length === 1 ? "" : "s"}`}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-muted-foreground">
+                {entries.length === 0
+                  ? loadingEntries
+                    ? "Loading…"
+                    : "No customers yet"
+                  : `${entries.length} customer${entries.length === 1 ? "" : "s"}`}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={exportCsv}
+                disabled={entries.length === 0 || loadingEntries}
+              >
+                <Download />
+                Export CSV
+              </Button>
+            </div>
           </div>
 
           {entriesError ? (
