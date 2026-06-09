@@ -7,6 +7,7 @@ import { AuthShell } from "@/app/(auth)/auth-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { friendlyAuthError } from "@/lib/auth/error-messages";
 import { createClient } from "@/lib/supabase/client";
 
 export function LoginForm() {
@@ -32,7 +33,7 @@ export function LoginForm() {
 
     if (signInError) {
       setLoading(false);
-      setError(signInError.message);
+      setError(friendlyAuthError(signInError.message));
       return;
     }
 

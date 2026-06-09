@@ -6,6 +6,7 @@ import { AuthShell } from "@/app/(auth)/auth-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { friendlyAuthError } from "@/lib/auth/error-messages";
 import { createClient } from "@/lib/supabase/client";
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -49,7 +50,7 @@ export default function ResetPasswordPage() {
 
     if (updateError) {
       setLoading(false);
-      setError(updateError.message);
+      setError(friendlyAuthError(updateError.message));
       return;
     }
 

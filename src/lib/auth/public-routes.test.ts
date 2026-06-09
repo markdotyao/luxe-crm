@@ -8,6 +8,7 @@ describe("isPublicPath", () => {
     expect(isPublicPath("/reset-password")).toBe(true);
     expect(isPublicPath("/auth/callback")).toBe(true);
     expect(isPublicPath("/customers")).toBe(true);
+    expect(isPublicPath("/unavailable")).toBe(true);
   });
 
   it("gates app routes", () => {
